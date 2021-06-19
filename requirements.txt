@@ -1,4 +1,5 @@
 python-dotenv
 tk
 pyrebase
-pyqrcode
+qrcode
+pillow
