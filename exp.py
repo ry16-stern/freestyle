@@ -2,9 +2,22 @@ from tkinter import *
 from tkinter import messagebox
 import os
 import pyqrcode
+import pyrebase  
+
+firebaseConfig = {
+    "apiKey": "AIzaSyAWgbsRL6RVGFNrAy5pOaCc_e8bM8fkrgo",
+    "authDomain": "mfademo-fa400.firebaseapp.com",
+    "projectId": "mfademo-fa400",
+    "storageBucket": "mfademo-fa400.appspot.com",
+    "messagingSenderId": "968589107332",
+    "appId": "1:968589107332:web:42f38c670392f2859922d1",
+    "measurementId": "G-XW8RL344BF",
+    "databaseURL" : ""
+  }
 
 
-
+firebase=pyrebase.initialize_app(firebaseConfig)
+auth=firebase.auth()
 
 window = Tk()
 window.geometry("600x500")
@@ -36,28 +49,33 @@ class Pages():
         l4.place_forget()
         l5.place_forget()
         l6.place_forget()
+    def radio():
+         global r1,r2
+         r1=Radiobutton(window, text = "Register",  value = "value1", indicator = 0, background = "light blue", font="Bold, 16")
+         r1.place(width=100,height=40,x=196,y=130)
+         r2=Radiobutton(window, text = "Login",  value = "value2", indicator = 0, background = "light blue", font="Bold, 16")
+         r2.place(width=100,height=40,x=304,y=130)
 
 def generate():
-    if len(email.get())!=0 :
-        global qr,photo
-        qr = pyqrcode.create(email.get())
-        photo = BitmapImage(data = qr.xbm(scale=8))
-    else:
-        messagebox.showinfo("Please Enter some Subject")
-    try:
-        
-        showcode()
-    except:
-        pass
-
-def showcode():
-    imageLabel.config(image = photo)
-    subLabel.config(text="QR of " + email.get())
-    
+    emailval=email.get()
+    passval=password.get()
+    auth.create_user_with_email_and_password(emailval, passval)
+    #if len(email.get())!=0 :
+    #    global qr,photo
+    #    qr = pyqrcode.create(email.get())
+    #    photo = BitmapImage(data = qr.xbm(scale=8))
+    #else:
+    #    messagebox.showinfo("Please Enter some Subject")
+    #try:
+    #    
+    #    imageLabel.config(image = photo)
+    #    subLabel.config(text="QR of " + email.get())
+    #except:
+    #    pass
 
 
 Pages.login_show()
-
+Pages.radio()
 imageLabel = Label(window)
 imageLabel.place(x=0, y=0)
 

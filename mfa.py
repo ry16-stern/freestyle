@@ -2,8 +2,17 @@ from tkinter import *
 from tkinter import messagebox
 import qrcode
 from PIL import Image
-  
+import pyrebase  
 
+firebaseConfig = {
+    "apiKey": "AIzaSyAWgbsRL6RVGFNrAy5pOaCc_e8bM8fkrgo",
+    "authDomain": "mfademo-fa400.firebaseapp.com",
+    "projectId": "mfademo-fa400",
+    "storageBucket": "mfademo-fa400.appspot.com",
+    "messagingSenderId": "968589107332",
+    "appId": "1:968589107332:web:42f38c670392f2859922d1",
+    "measurementId": "G-XW8RL344BF"
+  }
 class new(Toplevel):
 
  def __init__(self, master = None):

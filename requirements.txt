@@ -1,5 +1,8 @@
 python-dotenv
 tk
-pyrebase
+gcloud
+crypto
+pycryptodome
 qrcode
 pillow
+pyrebase4
