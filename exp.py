@@ -67,6 +67,10 @@ class Pages():
         l6.place_forget()
         r1.place_forget()
         r2.place_forget()
+    def reset_form():
+        contrvar.set(None)
+        Pages.reg_hide()
+        Pages.radio()   
     
 
 def generate():
@@ -83,17 +87,28 @@ def generate():
             secret=pyotp.random_base32()
             data = {  "key": secret }
             # Pass the user's idToken to the set method of pyrebase
-            results = db.child(token["localId"]).set(data)
+            try:
+                results = db.child(token["localId"]).set(data)
+                if results:
+                    messagebox.showinfo("Account created succesfully")
+            except:
+                messagebox.showinfo("Error","Unknown error creating account")
+                Pages.reset_form()
 
         except Exception as e:
             error_json = e.args[1]
+            print(error_json)
             error=json.loads(error_json)['error']['message']
             
             if error=="EMAIL_EXISTS":
                  messagebox.showerror("Error","Email already registered")
-                 contrvar.set(None)
-                 Pages.reg_hide()
-                 Pages.radio()
+                 
+            elif error=="WEAK_PASSWORD : Password should be at least 6 characters":
+                messagebox.showwarning("Error","WEAK_PASSWORD : Password should be at least 6 characters")
+                
+            if error=="INVALID_EMAIL":
+                 messagebox.showwarning("Error","You entered an invalid email, please etner a valid email")
+            Pages.reset_form()
 
 
         
