@@ -31,7 +31,7 @@ window.canvas = Canvas(window,bg = "white" , width="580", height="480").pack()
 class Pages():
     def radio():
          global r0,r1,r2,contrvar
-         r0=Label(window, text="MFA authentication demo", bg="white" , font="bold, 20")
+         r0=Label(window, text="MFA authentication demo", bg="white" , font="bold, 15")
          r0.place(x=160,y=50)
          contrvar=StringVar()
          r1=Radiobutton(window, text = "Register",  variable = contrvar, value = "1", command=lambda : Pages.reg_show("Register new user page","REGISTER"),indicator = 0, background = "light blue", font="Bold, 14")
@@ -85,7 +85,16 @@ class Pages():
         r2.place_forget()
         c1=Button(window , text = "CONFIRM" , bg="light blue" , fg="white", command= lambda :Pages.qr_confirmed(), font="bold, 16")
         c1.place(width=200, height=60 , x=175 , y=380)
-    def show_mfa(key,z):
+    def show_mfa():
+        l4.place_forget()
+        l5.place_forget()
+        r1.place_forget()
+        r2.place_forget()
+        l2.config(text="Code")
+        l3.delete(0, 'end')
+        l6.config(text="CANCEL")
+
+    def countdown(key,z):
         if z>30:
             curr_time = datetime.now()
             sec = int(curr_time.strftime('%S'))
@@ -98,15 +107,22 @@ class Pages():
                 t=30-sec
         else:
             t=z
-        
+        totp = pyotp.TOTP(key)
         text=StringVar()
         text_first="You have "
-        text_last=" to enter the code"
+        text_last=" seconds to enter the code"
         text=text_first+str(t)+text_last
         r0.config(text=text)
-        t -= 1
-        if t>0:
-            window.after(1000,lambda: Pages.show_mfa(key,t))
+        correct_value=str(totp.now())
+        entered_value=email.get()
+        if correct_value==entered_value:
+            #Authenticate user
+            messagebox.showinfo("SUCCESS","MFA Authentication was succesful!")
+        else:
+            t -= 1
+            if t<1:
+                t=30
+            window.after(1000,lambda: Pages.countdown(key,t))
 
 
 
@@ -177,7 +193,8 @@ def generate():
             result = db.child(token["localId"]).get().val()
             key=result["key"]
             #check potp value
-            Pages.show_mfa(key,40)
+            Pages.show_mfa()
+            Pages.countdown(key,40)
         except Exception as e:
             error_json = e.args[1]
             print(error_json)
