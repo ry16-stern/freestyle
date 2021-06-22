@@ -58,6 +58,8 @@ class Pages():
             l5.place(x = 170, y = 300,  width=300,  height=60)
             l6=Button(window , text = l6_text , bg="blue" , fg="white", command= generate, font="bold, 16")
             l6.place(width=200, height=60 , x=220 , y=400)
+    def barcode_show():
+        global b0,b1
     def reg_hide():
         r0.place_forget()
         l2.place_forget()
@@ -70,17 +72,46 @@ class Pages():
     def reset_form():
         contrvar.set(None)
         Pages.reg_hide()
-        Pages.radio()   
+        Pages.radio()
+    def qr_confirmed():
+        imageLabel.place_forget()
+        subLabel.place_forget()
+        c1.place_forget()
+        Pages.radio()
+    def qr_view():
+        global c1
+        Pages.reg_hide()
+        r0.place_forget()
+        r1.place_forget()
+        r2.place_forget()
+        c1=Button(window , text = "CONFIRM" , bg="light blue" , fg="white", command= lambda :Pages.qr_confirmed(), font="bold, 16")
+        c1.place(width=200, height=60 , x=175 , y=380)
+
+
     
+def qrcodegen(link):
+    if len(email.get())!=0 :
+        global qr,photo
+        qr = pyqrcode.create(link)
+        photo = BitmapImage(data = qr.xbm(scale=5))
+    else:
+        messagebox.showinfo("Please Enter some Subject")
+    try:
+
+        showcode()
+    except:
+        pass
+
+def showcode():
+    imageLabel.config(image = photo)
+    subLabel.config(text="Scan this code with Google Authenticator")
 
 def generate():
     emailval=email.get()
     passval=password.get()
     db = firebase.database()
     if contrvar.get()=="1":
-        #Register radio button enabled
-        
-        
+        #Register radio button enabled      
         try:
             token = auth.create_user_with_email_and_password(emailval, passval)
             #Create base32 secret and store in data var
@@ -90,7 +121,12 @@ def generate():
             try:
                 results = db.child(token["localId"]).set(data)
                 if results:
-                    messagebox.showinfo("Account created succesfully")
+                    messagebox.showinfo("Success!!","Account created succesfully")
+                    #create OTP link for google authentication
+                    link=pyotp.totp.TOTP(secret).provisioning_uri(name=emailval, issuer_name='MFA Demo')
+                    qrcodegen(link)
+                    Pages.qr_view()
+
             except:
                 messagebox.showinfo("Error","Unknown error creating account")
                 Pages.reset_form()
@@ -110,43 +146,27 @@ def generate():
                  messagebox.showwarning("Error","You entered an invalid email, please etner a valid email")
             Pages.reset_form()
 
-
-        
-       
-
     elif contrvar.get()=="2":
         #Login radio button enabled
         token = auth.sign_in_with_email_and_password(emailval, passval)
-        
-        
-
         result = db.child(token["localId"]).get().val()
+        print("Get result:",result)
         #check potp value
         #totp = pyotp.TOTP(secret)
         #correct_number=totp.now()
-        print("Get result:",result)
+        
     #
-    #if len(email.get())!=0 :
-    #    global qr,photo
-    #    qr = pyqrcode.create(email.get())
-    #    photo = BitmapImage(data = qr.xbm(scale=8))
-    #else:
-    #    messagebox.showinfo("Please Enter some Subject")
-    #try:
-    #    
-    #    imageLabel.config(image = photo)
-    #    subLabel.config(text="QR of " + email.get())
-    #except:
-    #    pass
+    
+
 
 
 
 Pages.radio()
 
-imageLabel = Label(window)
-imageLabel.place(x=0, y=0)
+imageLabel = Label(window,bg="white")
+imageLabel.place(x=130, y=60)
 
-subLabel = Label(window,text="")
-subLabel.place(x=0, y=0)
+subLabel = Label(window,text="",font="Bold, 14",bg="white")
+subLabel.place(x=110, y=40)
 
 window.mainloop()
