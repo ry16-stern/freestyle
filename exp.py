@@ -1,12 +1,11 @@
 from tkinter import *
 from tkinter import messagebox
-import os
+import json
+from datetime import datetime
+import time
 import pyqrcode
 import pyrebase  
 import pyotp
-import traceback
-import logging
-import json
 
 firebaseConfig = {
     "apiKey": "AIzaSyAWgbsRL6RVGFNrAy5pOaCc_e8bM8fkrgo",
@@ -86,6 +85,31 @@ class Pages():
         r2.place_forget()
         c1=Button(window , text = "CONFIRM" , bg="light blue" , fg="white", command= lambda :Pages.qr_confirmed(), font="bold, 16")
         c1.place(width=200, height=60 , x=175 , y=380)
+    def show_mfa(key,z):
+        if z>30:
+            curr_time = datetime.now()
+            sec = int(curr_time.strftime('%S'))
+            #depending on the current second calculate how many seconds left before the next cycle
+            if sec>30:
+                t=60-sec
+            elif sec==30:
+                t=30
+            elif sec<30:
+                t=30-sec
+        else:
+            t=z
+        
+        text=StringVar()
+        text_first="You have "
+        text_last=" to enter the code"
+        text=text_first+str(t)+text_last
+        r0.config(text=text)
+        t -= 1
+        if t>0:
+            window.after(1000,lambda: Pages.show_mfa(key,t))
+
+
+
 
 
     
@@ -148,13 +172,22 @@ def generate():
 
     elif contrvar.get()=="2":
         #Login radio button enabled
-        token = auth.sign_in_with_email_and_password(emailval, passval)
-        result = db.child(token["localId"]).get().val()
-        print("Get result:",result)
-        #check potp value
-        #totp = pyotp.TOTP(secret)
-        #correct_number=totp.now()
-        
+        try:
+            token = auth.sign_in_with_email_and_password(emailval, passval)
+            result = db.child(token["localId"]).get().val()
+            key=result["key"]
+            #check potp value
+            Pages.show_mfa(key,40)
+        except Exception as e:
+            error_json = e.args[1]
+            print(error_json)
+            error=json.loads(error_json)['error']['message']
+            if error=="INVALID_PASSWORD" or error=="EMAIL_NOT_FOUND":
+                 messagebox.showerror("Error","Username or password are incorrect")
+                 
+        #
+        #
+
     #
     
 
