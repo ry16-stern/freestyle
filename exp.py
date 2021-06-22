@@ -3,6 +3,10 @@ from tkinter import messagebox
 import os
 import pyqrcode
 import pyrebase  
+import pyotp
+import traceback
+import logging
+import json
 
 firebaseConfig = {
     "apiKey": "AIzaSyAWgbsRL6RVGFNrAy5pOaCc_e8bM8fkrgo",
@@ -12,7 +16,7 @@ firebaseConfig = {
     "messagingSenderId": "968589107332",
     "appId": "1:968589107332:web:42f38c670392f2859922d1",
     "measurementId": "G-XW8RL344BF",
-    "databaseURL" : ""
+    "databaseURL" : "https://mfademo-fa400-default-rtdb.firebaseio.com/"
   }
 
 
@@ -26,40 +30,87 @@ window.title("MFA app")
 window.canvas = Canvas(window,bg = "white" , width="580", height="480").pack()
 
 class Pages():
-    def login_show():
+    def radio():
+         global r0,r1,r2,contrvar
+         r0=Label(window, text="MFA authentication demo", bg="white" , font="bold, 20")
+         r0.place(x=160,y=50)
+         contrvar=StringVar()
+         r1=Radiobutton(window, text = "Register",  variable = contrvar, value = "1", command=lambda : Pages.reg_show("Register new user page","REGISTER"),indicator = 0, background = "light blue", font="Bold, 14")
+         r1.place(width=100,height=40,x=196,y=130)
+         r2=Radiobutton(window, text = "Login",     variable = contrvar, value = "2", command=lambda :  Pages.reg_show("Login page","LOGIN"),indicator = 0, background = "light blue", font="Bold, 14")
+         r2.place(width=100,height=40,x=304,y=130)
+    def reg_show(l1_txt,l6_txt):
             global email,password ,l1,l2,l3,l4,l5,l6
+            l1_text=StringVar()
+            l6_text=StringVar()
+            l1_text=l1_txt
+            l6_text=l6_txt
             email = StringVar()
             password = StringVar()
-            l1=Label(window, text="MFA authentication demo", bg="white" , font="bold, 20")
-            l1.place(x=160,y=50)
+            r0.config(text=l1_text)
             l2=Label(window,text = "email", bg="white" , font="14")
             l2.place(x=90, y=210)
-            l3=Entry(window, textvariable = email,font="50", bd=3, relief=GROOVE)
+            l3=Entry(window, textvariable = email,font="50", bd=3, relief=GROOVE, justify="center")
             l3.place(x = 170, y = 200,  width=300,  height=60)
             l4=Label(window,text = "password", bg="white" , font="14")
             l4.place(x=60, y=310)
-            l5=Entry(window,textvariable = password, font="50", bd=3, relief=GROOVE)
+            l5=Entry(window,textvariable = password, font="50", bd=3, relief=GROOVE, justify="center")
             l5.place(x = 170, y = 300,  width=300,  height=60)
-            l6=Button(window , text = "LOGIN" , bg="blue" , fg="white", command= generate, font="bold, 20")
+            l6=Button(window , text = l6_text , bg="blue" , fg="white", command= generate, font="bold, 16")
             l6.place(width=200, height=60 , x=220 , y=400)
-    def login_hide():
-        l1.place_forget()
+    def reg_hide():
+        r0.place_forget()
         l2.place_forget()
         l3.place_forget()
         l4.place_forget()
         l5.place_forget()
         l6.place_forget()
-    def radio():
-         global r1,r2
-         r1=Radiobutton(window, text = "Register",  value = "value1", indicator = 0, background = "light blue", font="Bold, 16")
-         r1.place(width=100,height=40,x=196,y=130)
-         r2=Radiobutton(window, text = "Login",  value = "value2", indicator = 0, background = "light blue", font="Bold, 16")
-         r2.place(width=100,height=40,x=304,y=130)
+        r1.place_forget()
+        r2.place_forget()
+    
 
 def generate():
     emailval=email.get()
     passval=password.get()
-    auth.create_user_with_email_and_password(emailval, passval)
+    db = firebase.database()
+    if contrvar.get()=="1":
+        #Register radio button enabled
+        
+        
+        try:
+            token = auth.create_user_with_email_and_password(emailval, passval)
+            #Create base32 secret and store in data var
+            secret=pyotp.random_base32()
+            data = {  "key": secret }
+            # Pass the user's idToken to the set method of pyrebase
+            results = db.child(token["localId"]).set(data)
+
+        except Exception as e:
+            error_json = e.args[1]
+            error=json.loads(error_json)['error']['message']
+            
+            if error=="EMAIL_EXISTS":
+                 messagebox.showerror("Error","Email already registered")
+                 contrvar.set(None)
+                 Pages.reg_hide()
+                 Pages.radio()
+
+
+        
+       
+
+    elif contrvar.get()=="2":
+        #Login radio button enabled
+        token = auth.sign_in_with_email_and_password(emailval, passval)
+        
+        
+
+        result = db.child(token["localId"]).get().val()
+        #check potp value
+        #totp = pyotp.TOTP(secret)
+        #correct_number=totp.now()
+        print("Get result:",result)
+    #
     #if len(email.get())!=0 :
     #    global qr,photo
     #    qr = pyqrcode.create(email.get())
@@ -74,8 +125,9 @@ def generate():
     #    pass
 
 
-Pages.login_show()
+
 Pages.radio()
+
 imageLabel = Label(window)
 imageLabel.place(x=0, y=0)
 
