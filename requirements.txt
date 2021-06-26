@@ -3,5 +3,6 @@ tk
 gcloud
 crypto
 pycryptodome
+pyqrcode
 pyotp
 pyrebase4
