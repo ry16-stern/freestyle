@@ -28,7 +28,7 @@ The structure of the .env as follows
 	measurementId="Your measurementId"
 	databaseURL="Your databaseURL"
 
-to launch the app run
+To launch the app run
 
 `python mfa.py`
 
@@ -46,7 +46,7 @@ Usually, site-packages are installed in the anaconda3 folder in
 
 Rename crypto folder to Crypto and try running the app again.
 
-#App workflow
+# App workflow
 
 ## Registration
 
@@ -59,7 +59,7 @@ The app accepts the URI in the form QR code so the app generates one.
 The app passes URI to the QR code generator and presents the code to the user.
 The user scans the code and registration is complete
 
-##Authentication
+## Authentication
 
 The user enters email and password.
 The app sends it to Firebase and if everything is correct gets back the user token.
@@ -67,7 +67,7 @@ Then uses Token ID to get the encrypted key from the Database.
 The user is now asked to enter the verification code from the app.
 The loop compares the codes every second and automatically acknowledges when the user gets it right.
 
-##Packages used:
+## Packages used:
 
 - python-dotenv
 - tk
