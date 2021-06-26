@@ -50,22 +50,22 @@ Rename crypto folder to Crypto and try running the app again.
 
 ## Registration
 
-The user enters email and password.
-The app passes it to firebase which creates the user account and gives back the token.
-App uses the token id and passes it to RealTime Database.
-The App generates a secret encrypted key and stores it with the unique id in the RealTimeDatabase for future reference.
-The next step is the creation of the provisioning URI for the OTP app.
-The app accepts the URI in the form QR code so the app generates one.
-The app passes URI to the QR code generator and presents the code to the user.
-The user scans the code and registration is complete
+- The user enters email and password.
+- The app passes it to firebase which creates the user account and gives back the token.
+- App uses the token id and passes it to RealTime Database.
+- The App generates a secret encrypted key and stores it with the unique id in the RealTimeDatabase for future reference.
+- The next step is the creation of the provisioning URI for the OTP app.
+- The app accepts the URI in the form QR code so the app generates one.
+- The app passes URI to the QR code generator and presents the code to the user.
+- The user scans the code and registration is complete
 
 ## Authentication
 
-The user enters email and password.
-The app sends it to Firebase and if everything is correct gets back the user token.
-Then uses Token ID to get the encrypted key from the Database.
-The user is now asked to enter the verification code from the app.
-The loop compares the codes every second and automatically acknowledges when the user gets it right.
+- The user enters email and password.
+- The app sends it to Firebase and if everything is correct gets back the user token.
+- Then uses Token ID to get the encrypted key from the Database.
+- The user is now asked to enter the verification code from the app.
+- The loop compares the codes every second and automatically acknowledges when the user gets it right.
 
 ## Packages used:
 
